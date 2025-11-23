@@ -21,7 +21,7 @@ if not api_key:
 genai.configure(api_key=api_key)
 
 # 埋め込み用モデル（JSONを作ったときと同じモデルを指定する）
-EMBEDDING_MODEL_ID = "models/text-embedding-004"
+EMBEDDING_MODEL_ID = "gemini-embedding-001"
 # アドバイス生成用モデル（文章が作れるモデルを指定する）
 GENERATION_MODEL_ID = "gemini-1.5-flash"
 
