@@ -19,7 +19,11 @@ if not api_key:
     st.stop()
 
 genai.configure(api_key=api_key)
-MODEL_ID = "models/text-embedding-004"
+
+# 埋め込み用モデル（JSONを作ったときと同じモデルを指定する）
+EMBEDDING_MODEL_ID = "models/text-embedding-004"
+# アドバイス生成用モデル（文章が作れるモデルを指定する）
+GENERATION_MODEL_ID = "gemini-1.5-flash"
 
 # ===== データの読み込みと前処理 =====
 @st.cache_data
@@ -39,7 +43,6 @@ def load_and_process_data():
     n_samples = len(embeddings)
     n_components = 2
     if n_samples < 2:
-         # データが少なすぎる場合はPCAできないのでNoneを返すなどの対策
          return words, embeddings, None, None
 
     pca = PCA(n_components=n_components)
@@ -71,8 +74,9 @@ with col1:
         else:
             with st.spinner("AIが分析中..."):
                 try:
-                    # 【修正箇所】GenerativeModelではなく、モジュール関数を直接呼び出します
-                    result = genai.embed_content(model=MODEL_ID, content=query)
+                    # 1. 入力テキストをベクトル化
+                    # GenerativeModelではなく、モジュール関数を直接呼び出します
+                    result = genai.embed_content(model=EMBEDDING_MODEL_ID, content=query)
                     query_vec = np.array(result['embedding'])
 
                     # 2. 類似度計算
@@ -109,7 +113,7 @@ with col1:
                         st.write(f"**{i+1}. {category}** (一致度: {score:.3f})")
                         st.progress(min(float(score), 1.0))
                     
-                    # C. キーワードアドバイス (ここは生成モデルを使うので GenerativeModel でOK)
+                    # C. キーワードアドバイス
                     st.write("#### 💡 申請書作成アドバイス")
                     target_cat = words[top_indices[0]]
                     advice_prompt = f"""
@@ -119,10 +123,9 @@ with col1:
                     研究テーマ: {query}
                     """
                     
-                    # モデル名を指定（Gemini Proなど）
-                    # ※ gemini-2.0-flash が使えない場合は gemini-pro に変更してください
+                    # アドバイス生成（ここでは文章生成モデルを使用）
                     try:
-                        model_gen = genai.GenerativeModel("gemini-1.5-flash") 
+                        model_gen = genai.GenerativeModel(GENERATION_MODEL_ID) 
                         advice_resp = model_gen.generate_content(advice_prompt)
                         st.info(advice_resp.text)
                     except Exception as e:
