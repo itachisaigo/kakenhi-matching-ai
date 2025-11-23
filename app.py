@@ -23,7 +23,7 @@ genai.configure(api_key=api_key)
 # 埋め込み用モデル（JSONを作ったときと同じモデルを指定する）
 EMBEDDING_MODEL_ID = "gemini-embedding-001"
 # アドバイス生成用モデル（文章が作れるモデルを指定する）
-GENERATION_MODEL_ID = "gemini-1.5-flash"
+GENERATION_MODEL_ID = "gemini-3-pro-preview"
 
 # ===== データの読み込みと前処理 =====
 @st.cache_data
